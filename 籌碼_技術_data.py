@@ -16,7 +16,7 @@ from sklearn.decomposition import PCA
 
 # 登入並獲取數據
 url = "https://api.finmindtrade.com/api/v4/login"
-payload = {"user_id": "109102049", "password": "Bb891202"}
+payload = {"user_id": "", "password": ""}
 data = requests.post(url, data=payload).json()
 print(data)
 
@@ -284,9 +284,15 @@ for column in columns_to_shift:
     if column in df_merged.columns:
         df_merged[f"{column}_shifted"] = df_merged[column].shift(f)
 
+# 移除shifted之前的原始列
+columns_to_drop = [col for col in columns_to_shift if col in df_merged.columns]
+df_merged.drop(columns=columns_to_drop, inplace=True)
+
 df_merged.info()
 
-df_merged["Returns"] = np.log(df_merged["close"] / df_merged["close"].shift(1))
+df_merged["Returns"] = np.log(
+    df_merged["close_shifted"] / df_merged["close_shifted"].shift(1)
+)
 df_merged.fillna(0, inplace=True)
 print(df_merged["Returns"].head())
 
